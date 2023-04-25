@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
     private var imageCapture: ImageCapture? = null
     private lateinit var outputDirectory: File
+    private var handler = Handler(Looper.getMainLooper())
+    private var runnable: Runnable? = null
+    private var isCapturing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,9 +55,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.startCaptureBtn.setOnClickListener{
-            takePhoto()
+            handleStartCaptureBtn()
         }
+    }
 
+    private fun handleStartCaptureBtn() {
+        isCapturing = !isCapturing
+
+        if(isCapturing) {
+            handler.postDelayed(Runnable {
+                handler.postDelayed(
+                    runnable!!,
+                    (Constants.CAPTURE_TIME_INTERVAL_IN_MINS * 1000 * 60).toLong()
+                )
+
+                takePhoto()
+            }.also { runnable = it }, (Constants.CAPTURE_TIME_INTERVAL_IN_MINS * 1000).toLong())
+            Toast.makeText(this@MainActivity, "Starting capture...", Toast.LENGTH_LONG).show()
+        } else {
+            handler.removeCallbacks(runnable!!)
+            Toast.makeText(this@MainActivity, "Stopping capture...", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun getOutputDirectory(): File {
