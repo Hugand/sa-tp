@@ -3,11 +3,14 @@ import '../css/App.scss'
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "@firebase/firestore"
 import { onSnapshot, doc, getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
 function App() {
   const [ occupation, setOccupation ] = useState(0)
   const [ time, setTime ] = useState(0)
   const [ firestore, setFirestore ] = useState(null)
+  const [ storage, setStorage ] = useState(null)
+  const [ previewUrl, setPreviewUrl ] = useState('')
   
   const firebaseConfig = {
     apiKey: process.env.REACT_APP_apiKey,
@@ -21,8 +24,16 @@ function App() {
   
   const initFirestore = () => {
     const app = initializeApp(firebaseConfig);
-    const firestore = getFirestore(app)
-    setFirestore(firestore)
+    const tmpFirestore = getFirestore(app)
+    const tmpStorage = getStorage();
+    setFirestore(tmpFirestore)
+    setStorage(tmpStorage)
+  }
+
+  const getPreviewUrl = async (datetime) => {
+    const url = await getDownloadURL(ref(storage, `previews/${datetime}.png`))
+
+    setPreviewUrl(url)
   }
 
   const listenForCollectionData = async () => {
@@ -31,8 +42,10 @@ function App() {
 
     const unsubscribe = onSnapshot(mostRecentQuery, querySnapshot => {
       querySnapshot.forEach(doc => {
-        setOccupation(doc.data().num_carros)
-        setTime(doc.data().timestamp)
+        const countData = doc.data()
+        setOccupation(countData.num_carros)
+        setTime(countData.timestamp)
+        getPreviewUrl(countData.timestamp)
       })
     })
 
@@ -44,7 +57,7 @@ function App() {
     if(firestore) {
       const unsubscribe = listenForCollectionData()
       
-      return () => { if(unsubscribe) unsubscribe() }
+      // return () => { if(unsubscribe) unsubscribe() }
     }
   }, [firestore])
 
@@ -59,7 +72,7 @@ function App() {
       </div>
 
       <div className="img-preview-container">
-        <img src={process.env.REACT_APP_PREVIEW_IMG_URL} alt="new"/>
+        <img src={previewUrl}/>
       </div>
 
     </div>
