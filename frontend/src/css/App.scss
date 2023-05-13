@@ -37,6 +37,29 @@
             font-weight: light;
             font-size: 0.8rem;
         }
+
+        .datepicker-container {
+            margin: 0 auto;
+            margin-top: 2em;
+        }
+
+        .predict-btn {
+            background-color: #3fade0;
+            color: white;
+            border: 0;
+            border-radius: 2px;
+            margin: 0 auto;
+            margin-top: 1em;
+            padding: 0.5em 1em;
+            font-weight: bold;
+            font-size: 1.3em;
+            transition: .1s;
+
+            &:hover {
+                cursor: pointer;
+                background-color: #2d8ac3;
+            }
+        }
     }
 
     .img-preview-container > img{

@@ -5,6 +5,10 @@ import { getFirestore } from "@firebase/firestore"
 import { onSnapshot, doc, getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 
+import * as tf from '@tensorflow/tfjs';
+import {loadGraphModel} from '@tensorflow/tfjs-converter';
+import { getDateAsString } from "../utils";
+
 function App() {
   const [ occupation, setOccupation ] = useState(0)
   const [ time, setTime ] = useState(0)
@@ -21,7 +25,7 @@ function App() {
     appId: process.env.REACT_APP_appId,
     measurementId: process.env.REACT_APP_measurementId
   };
-  
+
   const initFirestore = () => {
     const app = initializeApp(firebaseConfig);
     const tmpFirestore = getFirestore(app)
@@ -51,7 +55,7 @@ function App() {
 
     return unsubscribe
   }
-
+  // useEffect(getModel, [])
   useEffect(initFirestore, [])
   useEffect(() => {
     if(firestore) {
@@ -63,12 +67,12 @@ function App() {
 
   return (
     <div className="App">
-      <header>SA</header>
+      <header>SA - Atualidade</header>
 
       <div className="occupation-display-container">
         <label className="main-label">Ocupação atual:</label>
         <label className="main-label occupation-label">{ occupation }/12</label>
-        <label className="main-label time-label">{ time }/12</label>
+        <label className="main-label time-label">{ getDateAsString(new Date(Date.parse(time))) }</label>
       </div>
 
       <div className="img-preview-container">
