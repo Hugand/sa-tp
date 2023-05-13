@@ -6,6 +6,7 @@ from datetime import datetime
 from datetime import datetime
 from ultralytics import YOLO
 from ultralytics.yolo.utils import ops
+import requests
 
 import firebase_admin
 from firebase_admin import credentials
@@ -18,6 +19,16 @@ cred = credentials.Certificate("./key.json")
 app = firebase_admin.initialize_app(cred, {'storageBucket': 'teste-f902a.appspot.com'})
 
 db = firestore.client()
+
+def get_weather():
+    apiKey = 'f0365f1b76064139b07153811210612';
+    forecastApiUrl = f'http://api.weatherapi.com/v1/forecast.json?key={apiKey}&q=41.554536,-8.405331'
+    res = requests.get(forecastApiUrl).json()
+
+    temperature = res['current']['temp_c']
+    weather_condition = res['current']['condition']['text']
+
+    return temperature, weather_condition
 
 def save_preview(datetime):
     fileName = "preview.jpg"
@@ -36,6 +47,10 @@ def send_to_firebase(db, json_object):
     datetime = str(json_object['timestamp'])
 
     save_preview(datetime)
+
+    temperature, weather_condition = get_weather()
+    json_object['temperature'] = temperature
+    json_object['weather_condition'] = weather_condition
 
     db.collection(u'num_carros').document(datetime).set(json_object)
 
