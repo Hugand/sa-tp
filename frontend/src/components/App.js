@@ -27,7 +27,10 @@ function App() {
   };
 
   const initFirestore = () => {
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig, {
+      experimentalForceLongPolling: true, // this line
+      useFetchStreams: false, // and this line
+    });
     const tmpFirestore = getFirestore(app)
     const tmpStorage = getStorage();
 
