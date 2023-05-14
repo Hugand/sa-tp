@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import '../css/App.scss'
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
@@ -18,10 +18,10 @@ function ForecastScreen() {
   const [ errorMsg, setErrorMsg ] = useState(null)
   const [ isSelectedDateTimeValid, setIsSelectedDateTimeValid ] = useState()
 
-  const url = {
+  const url = useMemo(() => {return {
     // model: 'https://firebasestorage.googleapis.com/v0/b/teste-f902a.appspot.com/o/model.json?alt=media&token=1af2132a-035e-4b2e-b323-355310571ef3' 
     model: 'http://localhost:3000/modelv2/model.json',
-  };
+  }}, [])
 
   async function loadModel(url) {
     try {// For layered model
@@ -36,19 +36,7 @@ function ForecastScreen() {
     }
   }//React Hook
 
-  useEffect(()=>{
-    tf.ready().then(async () => {
-      loadModel(url)
-    });
-  },[])
-
-  useEffect(() => {
-    const d = checkIsSelectedDateTimeValid()
-    console.log(d)
-    setIsSelectedDateTimeValid(d)
-  }, [date, time])
-
-  const parseDateTime = () => {
+  const parseDateTime = useCallback(() => {
     const timeObj = {
       hours: time.split(':')[0],
       minutes: time.split(':')[1],
@@ -58,7 +46,7 @@ function ForecastScreen() {
     datetime.setMinutes(timeObj.minutes)
 
     return datetime
-  }
+  }, [date, time])
 
   const createModelInput = (datetime, weather) => {
     const dayOfWeek = datetime.getUTCDay()
@@ -136,7 +124,7 @@ function ForecastScreen() {
     navigate('/')
   }
 
-  const checkIsSelectedDateTimeValid = () => {
+  const checkIsSelectedDateTimeValid = useCallback(() => {
     const isDateStrValid = date !== ''
     const isTimeStrValid = time !== ''
 
@@ -146,11 +134,22 @@ function ForecastScreen() {
     const currDate = new Date()
 
     const timeDiff = new Date(datetime - currDate)
-    // console.log("=> ", datetime)
-    // console.log("D>C: " + (datetime > currDate) + "    TD<=10: " + (timeDiff.getUTCDate() <= 10))
 
     return datetime > currDate && timeDiff.getUTCDate() <= 10
-  }
+  }, [date, parseDateTime, time])
+
+  useEffect(()=>{
+    tf.ready().then(async () => {
+      loadModel(url)
+    });
+  },[url])
+
+  useEffect(() => {
+    const d = checkIsSelectedDateTimeValid()
+    console.log(d)
+    setIsSelectedDateTimeValid(d)
+  }, [date, time, checkIsSelectedDateTimeValid])
+
 
   return (
     <div className="App">

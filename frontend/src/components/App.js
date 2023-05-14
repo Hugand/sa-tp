@@ -1,13 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import '../css/App.scss'
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "@firebase/firestore"
-import { onSnapshot, doc, getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import { onSnapshot, collection, query, orderBy, limit } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
 import { useNavigate } from 'react-router-dom';
 
-import * as tf from '@tensorflow/tfjs';
-import {loadGraphModel} from '@tensorflow/tfjs-converter';
 import { getDateAsString } from "../utils";
 
 function App() {
@@ -32,17 +30,18 @@ function App() {
     const app = initializeApp(firebaseConfig);
     const tmpFirestore = getFirestore(app)
     const tmpStorage = getStorage();
+
     setFirestore(tmpFirestore)
     setStorage(tmpStorage)
   }
 
-  const getPreviewUrl = async (datetime) => {
+  const getPreviewUrl = useCallback(async (datetime) => {
     const url = await getDownloadURL(ref(storage, `previews/${datetime}.png`))
 
     setPreviewUrl(url)
-  }
+  }, [storage])
 
-  const listenForCollectionData = async () => {
+  const listenForCollectionData = useCallback(async () => {
     const countsRef = collection(firestore, "num_carros")
     const mostRecentQuery = query(countsRef, orderBy('timestamp', 'desc'), limit(1))
 
@@ -56,16 +55,13 @@ function App() {
     })
 
     return unsubscribe
-  }
-  // useEffect(getModel, [])
-  useEffect(initFirestore, [])
+  }, [firestore, getPreviewUrl])
+
+  useEffect(initFirestore, [initFirestore])
   useEffect(() => {
-    if(firestore) {
-      const unsubscribe = listenForCollectionData()
-      
-      // return () => { if(unsubscribe) unsubscribe() }
-    }
-  }, [firestore])
+    if(firestore)
+      listenForCollectionData()
+  }, [firestore, listenForCollectionData])
   
   const navigateToCurrentPage = () => {
     navigate('/forecast')
@@ -85,7 +81,7 @@ function App() {
       </div>
 
       <div className="img-preview-container">
-        <img src={previewUrl}/>
+        <img src={previewUrl} alt="preview img"/>
       </div>
 
     </div>
