@@ -20,7 +20,7 @@ function ForecastScreen() {
 
   const url = useMemo(() => {return {
     // model: 'https://firebasestorage.googleapis.com/v0/b/teste-f902a.appspot.com/o/model.json?alt=media&token=1af2132a-035e-4b2e-b323-355310571ef3' 
-    model: 'http://localhost:3000/modelv2/model.json',
+    model: process.env.REACT_APP_PUBLISH_HOST + '/modelv2/model.json',
   }}, [])
 
   async function loadModel(url) {
