@@ -1,17 +1,22 @@
 import { useState, useEffect } from "react";
 import '../css/App.scss'
-import DateTimePicker from 'react-datetime-picker';
 import 'react-datetime-picker/dist/DateTimePicker.css';
 import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
+import { useNavigate } from 'react-router-dom';
 
 import * as tf from '@tensorflow/tfjs';
 import { getDateAsString } from "../utils";
 
 function ForecastScreen() {
+  const navigate = useNavigate();
   const [ model, setModel ] = useState(null)
   const [ occupation, setOccupation ] = useState(null)
-  const [ datetime, onDateTimeChange ] = useState(new Date());
+  const [ predictedDatetime, setPredictedDatetime ] = useState(null);
+  const [ date, setDate ] = useState('')
+  const [ time, setTime ] = useState('')
+  const [ errorMsg, setErrorMsg ] = useState(null)
+  const [ isSelectedDateTimeValid, setIsSelectedDateTimeValid ] = useState()
 
   const url = {
     // model: 'https://firebasestorage.googleapis.com/v0/b/teste-f902a.appspot.com/o/model.json?alt=media&token=1af2132a-035e-4b2e-b323-355310571ef3' 
@@ -32,28 +37,56 @@ function ForecastScreen() {
   }//React Hook
 
   useEffect(()=>{
-    tf.ready().then(async ()=>{
+    tf.ready().then(async () => {
       loadModel(url)
     });
   },[])
+
+  useEffect(() => {
+    const d = checkIsSelectedDateTimeValid()
+    console.log(d)
+    setIsSelectedDateTimeValid(d)
+  }, [date, time])
+
+  const parseDateTime = () => {
+    const timeObj = {
+      hours: time.split(':')[0],
+      minutes: time.split(':')[1],
+    }
+    const datetime = new Date(Date.parse(date))
+    datetime.setHours(timeObj.hours)
+    datetime.setMinutes(timeObj.minutes)
+
+    return datetime
+  }
+
+  const createModelInput = (datetime, weather) => {
+    const dayOfWeek = datetime.getUTCDay()
+    const hours = datetime.getHours()
+    const minutes = datetime.getMinutes()
+    const input = [[dayOfWeek, hours, minutes, weather.temperature, weather.condition]]
+    
+    return input
+  }
   
   const useModel = async () => {
-    if(model != null) {
-      const weather = await getWeather()
+    console.log(date, time)
+    if(model !== null) {
+      const datetime = parseDateTime()
+      const weather = await getWeather(datetime)
 
-      const dayOfWeek = datetime.getUTCDay()
-      const hours = datetime.getHours()
-      const minutes = datetime.getMinutes()
-      const input = [[dayOfWeek, hours, minutes, weather.temperature, weather.condition]]
-      console.log(input)
+      if(weather === null) return
+
       let start = Date.now();
-  
-      // Run inference and get output tensors.
+      const input = createModelInput(datetime, weather)
       let outputTensor = model.predict(tf.tensor(input)) // as tf.Tensor
       let timeTaken = Date.now() - start;
+
       console.log("Total time taken : " + timeTaken + " milliseconds");
       const result = Math.round(outputTensor.dataSync())
       console.log(outputTensor.dataSync(), result)
+
+      setPredictedDatetime(datetime)
       setOccupation(result)
     }
   }
@@ -72,42 +105,85 @@ function ForecastScreen() {
     return hours
   }
 
-  const getWeather = async () => {
+  const getWeather = async (datetime) => {
     const response = await fetch(weatherUrl, options).then(res => res.json())
     const items = response.items
     const roundedDateTimeStr = `${datetime.getUTCFullYear()}-${String(datetime.getUTCMonth()+1).padStart(2, '0')}-${String(datetime.getUTCDate()).padStart(2, '0')}T${getRoundedNumber(datetime.getHours())}:00:00Z`
-    const weather = items.filter(i => {
-      console.log(i.date == roundedDateTimeStr)
-      return i.date == roundedDateTimeStr
-    })
-    console.log(roundedDateTimeStr)
-    console.log(weather)
+    const weather = items.filter(i => i.date === roundedDateTimeStr)
     
+    if(weather.length === 0) {
+      setErrorMsg("Data inválida (Máximo 10 dias)")
+      return null
+    }
+
     return {
       temperature: weather[0].temperature.avg,
-      condition: weather[0].weather.text != 'Regen'
+      condition: weather[0].weather.text !== 'Regen'
     }
+  }
+
+  const onDateChange = e => {
+    setDate(e.target.value)
+    setErrorMsg(null)
+  }
+
+  const onTimeChange = e => {
+    setTime(e.target.value)
+    setErrorMsg(null)
+  }
+  
+  const navigateToCurrentPage = () => {
+    navigate('/')
+  }
+
+  const checkIsSelectedDateTimeValid = () => {
+    const isDateStrValid = date !== ''
+    const isTimeStrValid = time !== ''
+
+    if(!(isDateStrValid && isTimeStrValid)) return false
+
+    const datetime = parseDateTime()
+    const currDate = new Date()
+
+    const timeDiff = new Date(datetime - currDate)
+    // console.log("=> ", datetime)
+    // console.log("D>C: " + (datetime > currDate) + "    TD<=10: " + (timeDiff.getUTCDate() <= 10))
+
+    return datetime > currDate && timeDiff.getUTCDate() <= 10
   }
 
   return (
     <div className="App">
-      <header>SA - Forecast</header>
+      <header>
+        <label className="title-label">SA - Forecast</label>
+        <button className="nav-btn" onClick={navigateToCurrentPage} >Ocupação atual</button>
+      </header>
 
       <div className="occupation-display-container">
         <label className="main-label">Ocupação prevista:</label>
         <label className="main-label occupation-label">{(!occupation) ? '-' : occupation}/12</label>
-        <label className="main-label time-label">{getDateAsString(new Date())}</label>
+        {
+          occupation && 
+            <label className="main-label time-label">{getDateAsString(predictedDatetime)}</label>
+        }
 
-        <div className="datepicker-container">
-          <DateTimePicker
-            amPmAriaLabel={'Select AM/PM'}
-            onChange={onDateTimeChange}
-            value={datetime}
-            format={"dd-MM-yy h:mm"}
-            />
+
+        <div className="datetime-picker-container">
+          <label className="main-label datepicker-label">Data e hora (máximo de 10 dias):</label>
+          <label className="main-label">
+            <input type="date" className="datetime-picker" onChange={onDateChange} value={date} />
+          </label>
+          <label className="main-label">
+            <input type="time" className="datetime-picker" onChange={onTimeChange} value={time} />
+          </label>
         </div>
 
-        <button className="predict-btn" onClick={useModel}>Prever</button>
+        {
+          errorMsg && 
+          <label className="main-label error-label"> { errorMsg } </label>
+        }
+
+        <button className="predict-btn" disabled={!isSelectedDateTimeValid} onClick={useModel}>Prever</button>
       </div>
 
     </div>

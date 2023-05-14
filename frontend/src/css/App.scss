@@ -7,12 +7,35 @@
     flex-direction: column;
 
     header {
-        text-align: center;
+        display: flex;
+        flex-direction: row;
         background-color: #3fade0;
-        padding: auto 1em;
-        font-size: 2em;
-        font-weight: bold;
-        color: white;
+        padding: 0.5em 1em;
+
+        .title-label {
+            text-align: center;
+            padding: auto 1em;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .nav-btn {
+            height: 100%;
+            background-color: transparent;
+            border: 0;
+            color: white;
+            margin: 0;
+            margin-left: auto;
+            padding: 0 1em;
+            font-weight: bold;
+            transition: .1s;
+            
+            &:hover {
+                cursor: pointer;
+                background-color: #48bcea;
+            }
+        }
     }
 
     .occupation-display-container {
@@ -21,7 +44,7 @@
         width: 100%;
         // margin: auto auto;
         margin: 10em 0;
-    
+
         .main-label {
             font-family: 'Roboto', sans-serif;
             font-weight: medium;
@@ -59,7 +82,37 @@
                 cursor: pointer;
                 background-color: #2d8ac3;
             }
+
+            &:disabled {
+                cursor: default;
+                background-color: #71abc6;
+            }
         }
+
+        .error-label {
+            margin-top: 0.5em;
+            color: #cf3737;
+            font-weight: bold;
+        }
+
+        .datetime-picker-container {
+            display: flex;
+            flex-direction: column;
+            margin-top: 0.8em;
+            margin-bottom: 0.3em;
+
+            .datepicker-label {
+                font-weight: bold;
+            }
+
+            .datetime-picker {
+                margin-top: 0.2em;
+                border: 0;
+                border-bottom: 1px solid #3c464c;
+                outline: none;
+            }
+        }
+    
     }
 
     .img-preview-container > img{

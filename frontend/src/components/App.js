@@ -4,12 +4,14 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "@firebase/firestore"
 import { onSnapshot, doc, getDocs, collection, query, orderBy, limit } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL } from "firebase/storage";
+import { useNavigate } from 'react-router-dom';
 
 import * as tf from '@tensorflow/tfjs';
 import {loadGraphModel} from '@tensorflow/tfjs-converter';
 import { getDateAsString } from "../utils";
 
 function App() {
+  const navigate = useNavigate();
   const [ occupation, setOccupation ] = useState(0)
   const [ time, setTime ] = useState(0)
   const [ firestore, setFirestore ] = useState(null)
@@ -64,10 +66,17 @@ function App() {
       // return () => { if(unsubscribe) unsubscribe() }
     }
   }, [firestore])
+  
+  const navigateToCurrentPage = () => {
+    navigate('/forecast')
+  }
 
   return (
     <div className="App">
-      <header>SA - Atualidade</header>
+      <header>
+        <label className="title-label">SA - Atualidade</label>
+        <button className="nav-btn" onClick={navigateToCurrentPage} >Ocupação atual</button>
+      </header>
 
       <div className="occupation-display-container">
         <label className="main-label">Ocupação atual:</label>
