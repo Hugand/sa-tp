@@ -5,6 +5,7 @@ import 'react-calendar/dist/Calendar.css';
 import 'react-clock/dist/Clock.css';
 import { useNavigate } from 'react-router-dom';
 
+
 import * as tf from '@tensorflow/tfjs';
 import { getDateAsString } from "../utils";
 
@@ -137,6 +138,8 @@ function ForecastScreen() {
 
     return datetime > currDate && timeDiff.getUTCDate() <= 10
   }, [date, parseDateTime, time])
+
+  // useEffect(() => {getModelFile()}, [])
 
   useEffect(()=>{
     tf.ready().then(async () => {

@@ -20,6 +20,8 @@ app = firebase_admin.initialize_app(cred, {'storageBucket': 'teste-f902a.appspot
 
 db = firestore.client()
 
+MAX_AVAILABLE_PARKING_SLOTS = 14
+
 def get_weather():
     apiKey = 'f0365f1b76064139b07153811210612';
     forecastApiUrl = f'http://api.weatherapi.com/v1/forecast.json?key={apiKey}&q=41.554536,-8.405331'
@@ -30,27 +32,32 @@ def get_weather():
 
     return temperature, weather_condition
 
-def save_preview(datetime):
+def save_to_storage(datetime, prefix='previews'):
     fileName = "preview.jpg"
     bucket = storage.bucket()
 
-    blobs = bucket.list_blobs(prefix="previews")
-    print(blobs)
-    for blob in blobs:
-        print(blob)
-        blob.delete()
+    if prefix == 'previews':
+        blobs = bucket.list_blobs(prefix=prefix)
+        print(blobs)
+        for blob in blobs:
+            print(blob)
+            blob.delete()
 
-    blob = bucket.blob(f'previews/{datetime}.png')
+    blob = bucket.blob(f'{prefix}/{datetime}.png')
     blob.upload_from_filename(fileName)
 
 def send_to_firebase(db, json_object):
     datetime = str(json_object['timestamp'])
 
-    save_preview(datetime)
+    save_to_storage(datetime)
 
     temperature, weather_condition = get_weather()
     json_object['temperature'] = temperature
     json_object['weather_condition'] = weather_condition
+
+    if json_object['num_carros'] > MAX_AVAILABLE_PARKING_SLOTS:
+        print("Saving mislabeled")
+        save_to_storage(datetime, prefix='mislabeled')
 
     db.collection(u'num_carros').document(datetime).set(json_object)
 
@@ -67,7 +74,7 @@ def get_detections(img_path, model):
     results = model(img_path)
     # results = ops.non_max_suppression(results)
     img = results[0].plot(conf=False, labels=False)
-    filtered_detections = list(filter(lambda x: x == 2, list(results[0].boxes.cls)))
+    filtered_detections = list(filter(lambda x: x in [ 2, 7 ], list(results[0].boxes.cls)))
     # print(len(filtered_detections))
 
     cv2.imwrite('preview.jpg', img)
@@ -89,12 +96,11 @@ def get_detections(img_path, model):
     send_to_firebase(db, json_object)
 
 def apply_preprocessing(img):
-    img_cvt_color = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    img_pil = Image.fromarray(img_cvt_color)
-    rotated = img_pil.rotate(-11)
-    
-    im = np.array(rotated)[1450:1600, 0:3800]
-    im = im[:, :, ::-1].copy() 
+    mask = np.ones(img.shape[:2], dtype="uint8")
+    cv2.fillPoly(mask, pts=[np.array([[0, 405], [640, 245], [640, 260], [0, 430]])], color=(0, 0, 0))
+    cv2.fillPoly(mask, pts=[np.array([[570, 200], [640, 200], [640, 225], [570, 235]])], color=(0, 0, 0))
+    cv2.imshow("Rectangular Mask", mask)
+    im = cv2.bitwise_and(img, img, mask=mask)
 
     return im
 
@@ -112,7 +118,6 @@ def capture_video(model):
             frame_count += 1
         else:
             break
-        
 
         if frame_count % (fps*save_interval) == 0:
             get_detections(frame, model)
@@ -125,18 +130,15 @@ def capture_video(model):
     cap.release()
     cv2.destroyAllWindows()
 
-
-
-
 def main():
-    model = YOLO("yolov8s.pt")
+    model = YOLO("yolov8x.pt")
 
     # capture_video(model)
-    img = cv2.imread('exemplo.jpg')
+    img = cv2.imread('real_img.jpg')
     preprocessed_img = apply_preprocessing(img)
     get_detections(preprocessed_img, model)
-    
 
+    # capture_video(model)
 
 if __name__ == "__main__":
     main()
