@@ -21,7 +21,7 @@ function ForecastScreen() {
 
   const url = useMemo(() => {return {
     // model: 'https://firebasestorage.googleapis.com/v0/b/teste-f902a.appspot.com/o/model.json?alt=media&token=1af2132a-035e-4b2e-b323-355310571ef3' 
-    model: process.env.REACT_APP_PUBLISH_HOST + '/modelv2/model.json',
+    model: process.env.REACT_APP_PUBLISH_HOST + '/model/model.json',
   }}, [])
 
   async function loadModel(url) {
@@ -54,6 +54,8 @@ function ForecastScreen() {
     const hours = datetime.getHours()
     const minutes = datetime.getMinutes()
     const input = [[dayOfWeek, hours, minutes, weather.temperature, weather.condition]]
+
+    console.log(input)
     
     return input
   }
@@ -76,7 +78,7 @@ function ForecastScreen() {
       console.log(outputTensor.dataSync(), result)
 
       setPredictedDatetime(datetime)
-      setOccupation(result)
+      setOccupation(result > 14 ? 14 : result)
     }
   }
   
@@ -104,10 +106,10 @@ function ForecastScreen() {
       setErrorMsg("Data inválida (Máximo 10 dias)")
       return null
     }
-
+    console.log(weather[0].weather.text)
     return {
       temperature: weather[0].temperature.avg,
-      condition: weather[0].weather.text !== 'Regen'
+      condition: !weather[0].weather.text.includes('Regen') ? 1 : 0
     }
   }
 

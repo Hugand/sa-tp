@@ -18,7 +18,8 @@ def extract_datetime_features(datetime_str):
     data = {
         'weekday': datetime_object.weekday(),
         'hour': datetime_object.hour,
-        'minute': datetime_object.minute
+        'minute': datetime_object.minute,
+        'timestamp': datetime_object
     }
 
     return data
@@ -35,8 +36,8 @@ def data_gathering_pipeline():
         entry = doc.to_dict()
         doc_data = extract_datetime_features(entry['timestamp'])
         doc_data['n_carros'] = entry['num_carros']
-        doc_data['temperature'] = 12 # entry['temperature']
-        doc_data['weather_condition'] = 'Sunny' if i % 2 == 0 else 'Rainy' # entry['weather_condition']
+        doc_data['temperature'] = entry['temperature']
+        doc_data['weather_condition'] = entry['weather_condition']
 
         i += 1
 
@@ -93,5 +94,5 @@ def main():
     save_to_tfjs(model, model_dir)
     # save_to_tflite(model_dir)
 
-
-main()
+if __name__ == '__main__':
+    main()
