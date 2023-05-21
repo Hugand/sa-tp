@@ -53,7 +53,8 @@ function ForecastScreen() {
     const dayOfWeek = datetime.getUTCDay()
     const hours = datetime.getHours()
     const minutes = datetime.getMinutes()
-    const input = [[dayOfWeek, hours, minutes, weather.temperature, weather.condition]]
+    const input = [[dayOfWeek, hours, minutes, weather.temperature]]
+    // const input = [[dayOfWeek, hours, minutes, weather.temperature, weather.condition]]
 
     console.log(input)
     
