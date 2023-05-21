@@ -157,37 +157,38 @@ function ForecastScreen() {
   return (
     <div className="App">
       <header>
-        <label className="title-label">SA - Forecast</label>
+        <label className="title-label">Previsão de lotação</label>
         <button className="nav-btn" onClick={navigateToCurrentPage} >Ocupação atual</button>
       </header>
 
-      <div className="occupation-display-container">
-        <label className="main-label">Ocupação prevista:</label>
-        <label className="main-label occupation-label">{(!occupation) ? '-' : occupation}/12</label>
-        {
-          occupation && 
-            <label className="main-label time-label">{getDateAsString(predictedDatetime)}</label>
-        }
+      <main className="forecast-main">
+        <div className="occupation-display-container">
+          <label className="main-label">Ocupação prevista:</label>
+          <label className="main-label occupation-label">{(!occupation) ? '-' : occupation}<label>/14</label></label>
+          {
+            occupation && 
+              <label className="main-label time-label">{getDateAsString(predictedDatetime)}</label>
+          }
 
 
-        <div className="datetime-picker-container">
-          <label className="main-label datepicker-label">Data e hora (máximo de 10 dias):</label>
-          <label className="main-label">
-            <input type="date" className="datetime-picker" onChange={onDateChange} value={date} />
-          </label>
-          <label className="main-label">
-            <input type="time" className="datetime-picker" onChange={onTimeChange} value={time} />
-          </label>
+          <div className="datetime-picker-container">
+            <label className="main-label datepicker-label">Data e hora (máximo de 10 dias):</label>
+            <label className="main-label">
+              <input type="date" className="datetime-picker" onChange={onDateChange} value={date} />
+            </label>
+            <label className="main-label">
+              <input type="time" className="datetime-picker" onChange={onTimeChange} value={time} />
+            </label>
+          </div>
+
+          {
+            errorMsg && 
+            <label className="main-label error-label"> { errorMsg } </label>
+          }
+
+          <button className="predict-btn" disabled={!isSelectedDateTimeValid} onClick={useModel}>Prever</button>
         </div>
-
-        {
-          errorMsg && 
-          <label className="main-label error-label"> { errorMsg } </label>
-        }
-
-        <button className="predict-btn" disabled={!isSelectedDateTimeValid} onClick={useModel}>Prever</button>
-      </div>
-
+      </main>
     </div>
   );
 }

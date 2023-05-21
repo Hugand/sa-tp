@@ -1,12 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700;900&display=swap');
+$mobile-breakpoint: 1000px;
 
 .App {
     width: 100vw;
     height: 100vh;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: 60px auto;
+    background-color: #f8fbfc;
 
     header {
+        grid-row: 1;
         display: flex;
         flex-direction: row;
         background-color: #3fade0;
@@ -15,9 +18,10 @@
         .title-label {
             text-align: center;
             padding: auto 1em;
-            font-size: 2em;
+            font-size: 1.2em;
             font-weight: bold;
             color: white;
+            margin: auto 0;
         }
 
         .nav-btn {
@@ -38,86 +42,158 @@
         }
     }
 
-    .occupation-display-container {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        // margin: auto auto;
-        margin: 10em 0;
+    main {
+        grid-row: 2;
 
-        .main-label {
-            font-family: 'Roboto', sans-serif;
-            font-weight: medium;
-            text-align: center;
-        }
-    
-        .occupation-label {
-            font-weight:  bolder;
-            font-size: 3rem;
-        }
+        // flex-direction: column;
 
-        .time-label {
-            font-weight: light;
-            font-size: 0.8rem;
-        }
-
-        .datepicker-container {
-            margin: 0 auto;
-            margin-top: 2em;
-        }
-
-        .predict-btn {
-            background-color: #3fade0;
-            color: white;
-            border: 0;
-            border-radius: 2px;
-            margin: 0 auto;
-            margin-top: 1em;
-            padding: 0.5em 1em;
-            font-weight: bold;
-            font-size: 1.3em;
-            transition: .1s;
-
-            &:hover {
-                cursor: pointer;
-                background-color: #2d8ac3;
-            }
-
-            &:disabled {
-                cursor: default;
-                background-color: #71abc6;
-            }
-        }
-
-        .error-label {
-            margin-top: 0.5em;
-            color: #cf3737;
-            font-weight: bold;
-        }
-
-        .datetime-picker-container {
+        @media (max-width: $mobile-breakpoint) {
             display: flex;
             flex-direction: column;
-            margin-top: 0.8em;
-            margin-bottom: 0.3em;
+        }
 
-            .datepicker-label {
+        @media (min-width: $mobile-breakpoint) {
+            &.current-main {
+                display: grid;
+                grid-template-columns: 30% 70%;
+    
+                .occupation-display-container {
+                    grid-column: 1;
+                }
+    
+                .img-preview-container {
+                    grid-column: 2;
+                    margin: auto 1em;
+                }
+            }
+            
+            &.forecast-main {
+                display: flex;
+                flex-direction: column;
+                
+                .occupation-display-container {
+                    grid-column: 1;
+                    padding : 6em 8em;
+                    width: fit-content;
+                    margin: auto;
+                }
+            }
+        }
+
+        .occupation-display-container {
+            display: flex;
+            flex-direction: column;
+            // margin: auto auto;
+            margin: auto 1em;
+
+            background-color: white;
+            border-radius: 10px;
+            width: auto;
+            padding: 3em 0;
+            box-shadow: 2px 2px 20px #4093b925;
+
+            .main-label {
+                font-family: 'Roboto', sans-serif;
+                font-weight: medium;
+                text-align: center;
+            }
+        
+            .occupation-label, .temperature-label {
+                font-weight:  bolder;
+                font-size: 3rem;
+
+                label {
+                    font-weight:  500;
+                    font-size: 1.3rem;
+                }
+            }
+
+            .hr-d {
+                background-color: #94d3f8;
+                width: 60%;
+                height: 2px;
+                border-radius: 10px;
+                margin: 1em auto;
+            }
+
+            // .temperature-label {
+            //     margin-top: 0.8em;
+            // }
+
+            .weather-condition-label {
+                background-color: #5cb5ed;
+                border-radius: 60px;
+                width: fit-content;
+                margin: 0 auto;
+                margin-top: 0.4em;
+                padding: 0.8em 1em;
+                color: white;
+            }
+
+            .time-label {
+                font-weight: light;
+                font-size: 0.8rem;
+            }
+
+            .datepicker-container {
+                margin: 0 auto;
+                margin-top: 2em;
+            }
+
+            .predict-btn {
+                background-color: #3fade0;
+                color: white;
+                border: 0;
+                border-radius: 2px;
+                margin: 0 auto;
+                margin-top: 1em;
+                padding: 0.5em 1em;
+                font-weight: bold;
+                font-size: 1.3em;
+                transition: .1s;
+
+                &:hover {
+                    cursor: pointer;
+                    background-color: #2d8ac3;
+                }
+
+                &:disabled {
+                    cursor: default;
+                    background-color: #71abc6;
+                }
+            }
+
+            .error-label {
+                margin-top: 0.5em;
+                color: #cf3737;
                 font-weight: bold;
             }
 
-            .datetime-picker {
-                margin-top: 0.2em;
-                border: 0;
-                border-bottom: 1px solid #3c464c;
-                outline: none;
-            }
-        }
-    
-    }
+            .datetime-picker-container {
+                display: flex;
+                flex-direction: column;
+                margin-top: 0.8em;
+                margin-bottom: 0.3em;
 
-    .img-preview-container > img{
-        width: calc(100% - 2em);
-        height: auto;
-        padding: 1em;
+                .datepicker-label {
+                    font-weight: bold;
+                }
+
+                .datetime-picker {
+                    margin-top: 0.2em;
+                    border: 0;
+                    border-bottom: 1px solid #3c464c;
+                    outline: none;
+                }
+            }
+        
+        }
+
+        .img-preview-container > img{
+            width: calc(100% - 2em);
+            height: auto;
+            padding: 1em;
+            box-shadow: 2px 2px 20px #4093b925;
+        }
     }
 }

@@ -10,6 +10,8 @@ import { getDateAsString } from "../utils";
 
 function App() {
   const navigate = useNavigate();
+  const [ temperature, setTemperature ] = useState(0)
+  const [ weatherCondition, setWeatherCondition ] = useState('')
   const [ occupation, setOccupation ] = useState(0)
   const [ time, setTime ] = useState(0)
   const [ firestore, setFirestore ] = useState(null)
@@ -53,6 +55,8 @@ function App() {
         const countData = doc.data()
         setOccupation(countData.num_carros)
         setTime(countData.timestamp)
+        setTemperature(countData.temperature)
+        setWeatherCondition(countData.weather_condition)
         getPreviewUrl(countData.timestamp)
       })
     })
@@ -73,19 +77,24 @@ function App() {
   return (
     <div className="App">
       <header>
-        <label className="title-label">SA - Atualidade</label>
-        <button className="nav-btn" onClick={navigateToCurrentPage} >Ocupação atual</button>
+        <label className="title-label">Tempo real</label>
+        <button className="nav-btn" onClick={navigateToCurrentPage} >Previsão de lotação</button>
       </header>
 
-      <div className="occupation-display-container">
-        <label className="main-label">Ocupação atual:</label>
-        <label className="main-label occupation-label">{ occupation }/12</label>
-        <label className="main-label time-label">{ getDateAsString(new Date(Date.parse(time))) }</label>
-      </div>
+      <main className="current-main">
+        <div className="occupation-display-container">
+          <label className="main-label">Ocupação atual:</label>
+          <label className="main-label occupation-label">{ occupation }<label>/14</label></label>
+          <label className="main-label time-label">{ getDateAsString(new Date(Date.parse(time))) }</label>
+          <div className="hr-d"/>
+          <label className="main-label temperature-label">{ temperature }º</label>
+          <label className="main-label weather-condition-label">{ weatherCondition }</label>
+        </div>
 
-      <div className="img-preview-container">
-        <img src={previewUrl} alt="preview img"/>
-      </div>
+        <div className="img-preview-container">
+          <img src={previewUrl} alt="preview img"/>
+        </div>
+      </main>
 
     </div>
   );

@@ -93,7 +93,7 @@ def get_detections(img_path, model):
         "num_carros": len(filtered_detections),
         'timestamp': f"{datetime.now()}"
     }
-    send_to_firebase(db, json_object)
+    # send_to_firebase(db, json_object)
 
 def apply_preprocessing(img):
     mask = np.ones(img.shape[:2], dtype="uint8")
@@ -131,10 +131,10 @@ def capture_video(model):
     cv2.destroyAllWindows()
 
 def main():
-    model = YOLO("yolov8x.pt")
+    model = YOLO("yolov8x.onnx")
 
     # capture_video(model)
-    img = cv2.imread('real_img.jpg')
+    img = cv2.imread('out.jpg')
     preprocessed_img = apply_preprocessing(img)
     get_detections(preprocessed_img, model)
 
