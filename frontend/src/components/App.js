@@ -78,7 +78,7 @@ function App() {
     <div className="App">
       <header>
         <label className="title-label">Tempo real</label>
-        <button className="nav-btn" onClick={navigateToCurrentPage} >Previsão de lotação</button>
+        <button className="nav-btn" onClick={navigateToCurrentPage}>Previsão de lotação</button>
       </header>
 
       <main className="current-main">
@@ -87,7 +87,7 @@ function App() {
           <label className="main-label occupation-label">{ occupation }<label>/14</label></label>
           <label className="main-label time-label">{ getDateAsString(new Date(Date.parse(time))) }</label>
           <div className="hr-d"/>
-          <label className="main-label temperature-label">{ temperature }º</label>
+          <label className="main-label temperature-label">{ temperature }ºC</label>
           <label className="main-label weather-condition-label">{ weatherCondition }</label>
         </div>
 
